@@ -62,4 +62,4 @@ admin-reset-usage: "&3Usage: /referraladmin reset <player>"
 
 admin-no-permission: "&cYou don't have permission to execute this command."
 
-referring-placeholder-empty: "Nobody"
+referrerign-placeholder-empty: "Nobody"

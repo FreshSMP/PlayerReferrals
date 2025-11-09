@@ -39,13 +39,13 @@ public class PlayerReferralsExpansion extends PlaceholderExpansion {
                 RefUser refUser = new RefUser(player.getUniqueId());
                 return String.valueOf(refUser.getPlayerScore());
             }
-            case "referring": {
+            case "referrerign": {
                 RefUser refUser = new RefUser(player.getUniqueId());
                 UUID uuid = refUser.getReferrer();
                 if (uuid != null) {
                     return Bukkit.getOfflinePlayer(uuid).getName();
                 } else {
-                    String text = plugin.getMessagesConfig().getString("referring-placeholder-empty");
+                    String text = plugin.getMessagesConfig().getString("referrerign-placeholder-empty");
                     if (text == null) {
                         return "";
                     }
