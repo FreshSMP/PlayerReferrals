@@ -7,6 +7,4 @@ public class StringTools {
     public static String colors(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
-
-
 }

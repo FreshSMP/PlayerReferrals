@@ -1,10 +1,14 @@
 package com.stanexe.playerreferrals.util;
 
 import com.stanexe.playerreferrals.PlayerReferrals;
+import com.tcoded.folialib.impl.PlatformScheduler;
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +16,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DatabaseUtil {
+
     static final PlayerReferrals plugin = PlayerReferrals.getInstance();
     static final String dbType = plugin.getConfig().getString("database-type");
     private static final ExecutorService dbThread = Executors.newSingleThreadExecutor();
+    private static final PlatformScheduler scheduler = PlayerReferrals.scheduler();
     private static Connection conn;
 
     public static String getDbType() {
@@ -29,6 +35,7 @@ public class DatabaseUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         if (dbType == null) {
             plugin.getLogger().info("Invalid database type. Expected SQLITE or MYSQL, received nothing.");
             Bukkit.getPluginManager().disablePlugin(PlayerReferrals.getInstance());
@@ -51,21 +58,17 @@ public class DatabaseUtil {
                 Bukkit.getPluginManager().disablePlugin(PlayerReferrals.getInstance());
             }
         }
+
         return null;
     }
 
     public static boolean initializeTables(Connection conn) {
         if (conn == null) {
             plugin.getLogger().warning("Connection to the database appears to be invalid.");
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Bukkit.getPluginManager().disablePlugin(plugin);
-                }
-            }.runTask(plugin);
-
+            scheduler.runNextTick(task -> Bukkit.getPluginManager().disablePlugin(plugin));
             return false;
         }
+
         String tablePrefix = plugin.getConfig().getString("table-prefix");
         String[] sql = {"CREATE TABLE IF NOT EXISTS `" + tablePrefix + "referrals` (`uuid` CHAR(36) PRIMARY KEY NOT NULL, `referrer-uuid` CHAR(36));",
                 "CREATE TABLE IF NOT EXISTS `" + tablePrefix + "referral-scores` (`uuid` CHAR(36) PRIMARY KEY NOT NULL, `score` INT DEFAULT 0 NOT NULL);",
@@ -80,8 +83,8 @@ public class DatabaseUtil {
                 e.printStackTrace();
             }
         }
-        return true;
 
+        return true;
     }
 
     public static List<RefUser> getTopPlayers() {
@@ -103,12 +106,11 @@ public class DatabaseUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
-
 
     public static ExecutorService getDbThread() {
         return dbThread;
     }
-
 }

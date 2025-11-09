@@ -3,11 +3,10 @@ prefix: "&8[&3PlayerReferrals&8] "
 nonplayer: "This command can only be used by a player, for admin commands please use /referraladmin"
 
 # ---------------------------------------------------
-# ALL PLACEHOLDERS ARE CASESENSITIVE
+# ALL PLACEHOLDERS ARE CASE-SENSITIVE
 # ---------------------------------------------------
 
-
-# In order to remove sections, simple comment the line and it won't be displayed.
+# In order to remove sections, simply comment the line, and it won't be displayed.
 
 # The following placeholders can be used in the messages below:
 # %username% - The username of the player executing the command
@@ -63,4 +62,4 @@ admin-reset-usage: "&3Usage: /referraladmin reset <player>"
 
 admin-no-permission: "&cYou don't have permission to execute this command."
 
-referrerign-placeholder-empty: "Nobody"
+referring-placeholder-empty: "Nobody"

@@ -12,13 +12,12 @@ public class JoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-            RefUser refUser = new RefUser(e.getPlayer().getUniqueId());
+        RefUser refUser = new RefUser(e.getPlayer().getUniqueId());
 
-            if (plugin.getConfig().getBoolean("ip-check")) {
-                refUser.storeIP();
-            }
-            refUser.claimPendingRewards();
+        if (plugin.getConfig().getBoolean("ip-check")) {
+            refUser.storeIP();
+        }
+
+        refUser.claimPendingRewards();
     }
-
-
 }

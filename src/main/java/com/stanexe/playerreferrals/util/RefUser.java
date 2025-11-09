@@ -1,21 +1,29 @@
 package com.stanexe.playerreferrals.util;
 
 import com.stanexe.playerreferrals.PlayerReferrals;
+import com.tcoded.folialib.impl.PlatformScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static com.stanexe.playerreferrals.util.DatabaseUtil.getDbType;
 import static com.stanexe.playerreferrals.util.StringTools.colors;
 
 public class RefUser {
+
+    private static final PlatformScheduler scheduler = PlayerReferrals.scheduler();
+
     private final UUID uuid;
 
     private final PlayerReferrals plugin = PlayerReferrals.getInstance();
@@ -77,10 +85,10 @@ public class RefUser {
             } else {
                 plugin.getLogger().warning("An error has occurred in the database. Please report this to the plugin author if this keeps happening.");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return -1;
     }
 
@@ -114,6 +122,7 @@ public class RefUser {
         if (minutesAllowed == -1) {
             return true;
         }
+
         long minutesPlayed = ticksPlayed / 20 / 60;
         return minutesPlayed <= minutesAllowed;
     }
@@ -131,6 +140,7 @@ public class RefUser {
         if (cache.containsKey(uuid)) {
             return cache.get(uuid);
         }
+
         return null;
     }
 
@@ -139,6 +149,7 @@ public class RefUser {
         if (p == null) {
             return;
         }
+
         String ip = Objects.requireNonNull(p.getAddress()).getHostString();
         Cache.addToIpCache(uuid, ip);
         DatabaseUtil.getDbThread().execute(() -> {
@@ -173,6 +184,7 @@ public class RefUser {
         if (cache.containsKey(uuid)) {
             return cache.get(uuid);
         }
+
         return null;
     }
 
@@ -189,6 +201,7 @@ public class RefUser {
                     } else {
                         stmt = conn.prepareStatement("INSERT INTO `" + tablePrefix + "referrals` (`uuid`, `referrer-uuid`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `referrer-uuid`=?;");
                     }
+
                     stmt.setString(1, String.valueOf(uuid));
                     stmt.setString(2, String.valueOf(referrerUUID));
                     stmt.setString(3, String.valueOf(referrerUUID));
@@ -197,7 +210,6 @@ public class RefUser {
                 } else {
                     plugin.getLogger().warning("An error has occurred in the database. Please report this to the plugin author if this keeps happening.");
                 }
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -210,6 +222,7 @@ public class RefUser {
         if (p == null) {
             return;
         }
+
         String msg = plugin.getConfig().getString("referred-rewards.message");
         List<String> commands = (List<String>) plugin.getConfig().getList("referred-rewards.commands");
         if (msg != null) {
@@ -218,22 +231,16 @@ public class RefUser {
             msg = msg.replace("%referralUsername%", String.valueOf(Bukkit.getOfflinePlayer(referralUUID).getName()));
             p.sendMessage(colors(msg));
         }
+
         if (commands != null) {
             for (String cmd : commands) {
                 cmd = cmd.replace("%username%", p.getName());
                 cmd = cmd.replace("%score%", String.valueOf(this.getPlayerScore()));
                 cmd = cmd.replace("%referralUsername%", String.valueOf(Bukkit.getOfflinePlayer(referralUUID).getName()));
                 String finalCmd = cmd;
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd);
-                    }
-                }.runTask(plugin);
-
+                scheduler.runNextTick(task -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -250,20 +257,17 @@ public class RefUser {
             msg = msg.replace("%referredUsername%", String.valueOf(Bukkit.getOfflinePlayer(referralUUID).getName()));
             p.sendMessage(colors(msg));
         }
+
         if (commands != null) {
             for (String cmd : commands) {
                 cmd = cmd.replace("%username%", p.getName());
                 cmd = cmd.replace("%score%", String.valueOf(score));
                 cmd = cmd.replace("%referredUsername%", String.valueOf(Bukkit.getOfflinePlayer(referralUUID).getName()));
                 String finalCmd = cmd;
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd);
-                    }
-                }.runTask(plugin);
+                scheduler.runNextTick(task -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
             }
         }
+
         if (Milestones.isMilestone(score)) {
             this.giveMilestoneRewards(score);
         }
@@ -274,6 +278,7 @@ public class RefUser {
         if (p == null) {
             return;
         }
+
         List<String> commands = plugin.getConfig().getStringList("milestones." + score + ".commands");
         String msg = plugin.getConfig().getString("milestones." + score + ".message");
         if (msg != null) {
@@ -281,19 +286,14 @@ public class RefUser {
             msg = msg.replace("%score%", String.valueOf(score));
             p.sendMessage(colors(msg));
         }
-        if (commands.size() != 0) {
+
+        if (!commands.isEmpty()) {
             for (String cmd : commands) {
                 cmd = cmd.replace("%username%", p.getName());
                 cmd = cmd.replace("%score%", String.valueOf(score));
                 String finalCmd = cmd;
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd);
-                    }
-                }.runTask(plugin);
+                scheduler.runNextTick(task -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
             }
-
         }
     }
 
@@ -314,12 +314,10 @@ public class RefUser {
                 } else {
                     plugin.getLogger().warning("An error has occurred in the database. Please report this to the plugin author if this keeps happening.");
                 }
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         });
-
     }
 
     public void setOfflineRewards(UUID referralUUID, int referralScore) {
@@ -343,7 +341,6 @@ public class RefUser {
                 e.printStackTrace();
             }
         });
-
     }
 
     public void claimPendingRewards() {
@@ -354,6 +351,7 @@ public class RefUser {
             for (Map.Entry<UUID, Integer> entry : rewards) {
                 this.giveReferralRewards(entry.getKey(), entry.getValue());
             }
+
             Cache.removeFromAwaitingRewardCache(uuid);
             DatabaseUtil.getDbThread().execute(() -> {
                 Connection conn;
@@ -370,8 +368,6 @@ public class RefUser {
                     e.printStackTrace();
                 }
             });
-
-
         }
     }
 }

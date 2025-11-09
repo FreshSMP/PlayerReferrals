@@ -9,14 +9,15 @@ import java.sql.SQLException;
 public class SQLite {
 
     private Connection conn;
+
     final PlayerReferrals plugin = PlayerReferrals.getInstance();
+
     public Connection openConnection() throws SQLException {
         if (conn != null && conn.isValid(1)) {
             return conn;
         }
+
         conn = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + "/" + plugin.getName() + ".db");
         return conn;
     }
-
-
 }

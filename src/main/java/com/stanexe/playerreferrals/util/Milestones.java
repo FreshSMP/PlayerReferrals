@@ -1,7 +1,6 @@
 package com.stanexe.playerreferrals.util;
 
 import com.stanexe.playerreferrals.PlayerReferrals;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ public class Milestones {
             if (milestonesSection == null) {
                 plugin.getLogger().warning("\"milestones\" section does not exist, even though it is enabled in the config.");
             }
+
             Set<String> keys = milestonesSection.getKeys(false);
             for (String key : keys) {
                 try {
@@ -29,17 +29,11 @@ public class Milestones {
                 } catch (NumberFormatException e) {
                     plugin.getLogger().warning("Could not resolve \"" + key + "\"as a valid score. Ignoring it.");
                 }
-
             }
-
-
         }
     }
 
     public static boolean isMilestone(int score) {
         return milestones.contains(score);
     }
-
-
-
 }

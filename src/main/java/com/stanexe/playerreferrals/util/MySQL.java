@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MySQL {
+
     final PlayerReferrals plugin = PlayerReferrals.getInstance();
     private final FileConfiguration config = plugin.getConfig();
     private Connection conn;
@@ -22,6 +23,7 @@ public class MySQL {
             if (conn != null && conn.isValid(1)) {
                 return conn;
             }
+
             conn = DriverManager.getConnection("jdbc:mysql://" +
                     this.host + ":" +
                     this.port + "/" +
@@ -34,6 +36,4 @@ public class MySQL {
 
         return conn;
     }
-
-
 }

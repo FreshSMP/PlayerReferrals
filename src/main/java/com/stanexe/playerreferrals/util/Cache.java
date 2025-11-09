@@ -6,7 +6,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Cache {
 
@@ -20,11 +24,12 @@ public class Cache {
 
     public Cache() {
         DatabaseUtil.getDbThread().execute(() -> {
-            boolean tablesInitialized = false;
+            boolean tablesInitialized;
             tablesInitialized = DatabaseUtil.initializeTables(DatabaseUtil.getConn());
             while (!tablesInitialized) {
                 return;
             }
+
             Connection conn = DatabaseUtil.getConn();
             try {
                 PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `" + tablePrefix + "referral-scores`;");
@@ -34,6 +39,7 @@ public class Cache {
                     scoresCache.put(UUID.fromString(rsScores.getString("uuid")), rsScores.getInt("score"));
                     i++;
                 }
+
                 stmt.close();
 
                 PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM `" + tablePrefix + "referrals`;");
@@ -63,6 +69,7 @@ public class Cache {
                     } else {
                         rewards = new ArrayList<>();
                     }
+
                     rewards.add(new AbstractMap.SimpleEntry<>(UUID.fromString(rsAwaiting.getString("uuid")),
                             rsAwaiting.getInt("reward-score")));
                     awaitingRewardCache.put(uuid, rewards);
@@ -115,8 +122,8 @@ public class Cache {
         if (awaitingRewardCache.containsKey(uuid)) {
             rewards = awaitingRewardCache.get(uuid);
         }
+
         rewards.add(new AbstractMap.SimpleEntry<>(referralUUID, score));
         awaitingRewardCache.put(uuid, rewards);
     }
-
 }

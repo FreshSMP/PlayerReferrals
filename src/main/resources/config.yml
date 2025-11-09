@@ -52,5 +52,5 @@ milestones:
 # To disable this, use -1
 minutes-allowed: 60
 
-# Set to false to disable the /referralleaderboard
+# Set as false to disable the /referralleaderboard
 enable-leaderboard: true

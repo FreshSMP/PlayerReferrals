@@ -7,6 +7,8 @@ import com.stanexe.playerreferrals.events.JoinListener;
 import com.stanexe.playerreferrals.util.Cache;
 import com.stanexe.playerreferrals.util.Milestones;
 import com.stanexe.playerreferrals.util.PlayerReferralsExpansion;
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.impl.PlatformScheduler;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,15 +21,25 @@ import java.io.IOException;
 import java.util.Objects;
 
 public final class PlayerReferrals extends JavaPlugin {
+
     private static PlayerReferrals instance;
+    private static PlatformScheduler scheduler;
+
     private FileConfiguration messagesConfig;
 
     public static PlayerReferrals getInstance() {
         return instance;
     }
+
+    public static PlatformScheduler scheduler() {
+        return scheduler;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
+        FoliaLib foliaLib = new FoliaLib(this);
+        scheduler = foliaLib.getScheduler();
         // Save default configs
         this.saveDefaultConfig();
         createMessagesConfig();
@@ -35,7 +47,7 @@ public final class PlayerReferrals extends JavaPlugin {
         // bStats
         if (getConfig().getBoolean("bStats")) {
             int pluginId = 11044;
-            Metrics metrics = new Metrics(this, pluginId);
+            new Metrics(this, pluginId);
         }
 
         // Init milestones
@@ -49,12 +61,10 @@ public final class PlayerReferrals extends JavaPlugin {
         Objects.requireNonNull(getCommand("referraladmin")).setExecutor(new ReferralAdminCommand());
         Objects.requireNonNull(getCommand("referral")).setExecutor(new ReferralCommand());
             Objects.requireNonNull(getCommand("referralleaderboard")).setExecutor(new ReferralLeaderboardCommand());
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlayerReferralsExpansion().register();
         }
-
     }
-
 
     @Override
     public void onDisable() {
@@ -67,6 +77,7 @@ public final class PlayerReferrals extends JavaPlugin {
             messagesFile.getParentFile().mkdirs();
             saveResource("messages.yml", false);
         }
+
         messagesConfig = new YamlConfiguration();
         try {
             messagesConfig.load(messagesFile);
