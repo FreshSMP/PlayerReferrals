@@ -43,14 +43,18 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.tcoded:FoliaLib</include>
+                                    <include>org.bstats:bstats-bukkit</include>
+                                    <include>org.bstats:bstats-base</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.bstats</pattern>
-                                    <shadedPattern>com.stanexe.playerreferrals.bstats</shadedPattern>
                                     <pattern>com.tcoded.folialib</pattern>
                                     <shadedPattern>com.stanexe.playerreferrals.libs.folialib</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>com.stanexe.playerreferrals.libs.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
